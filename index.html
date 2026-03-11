@@ -1,0 +1,723 @@
+Platform roulette · HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform Roulette</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a3d;
+    --accent: #f0c040;
+    --accent2: #e05a2b;
+    --text: #f0ede8;
+    --muted: #7a7a9a;
+    --green: #4caf7d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(240,192,64,0.02) 40px, rgba(240,192,64,0.02) 41px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(240,192,64,0.02) 40px, rgba(240,192,64,0.02) 41px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .logo-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .train-icon {
+    font-size: 28px;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 10vw, 72px);
+    letter-spacing: 4px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .tagline {
+    color: var(--muted);
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+
+  .card-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* Station selector */
+  .station-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .station-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .station-btn .s-name { font-weight: 600; }
+  .station-btn .s-city { font-size: 11px; color: var(--muted); }
+
+  .station-btn:hover {
+    border-color: var(--accent);
+    background: rgba(240,192,64,0.05);
+  }
+
+  .station-btn.selected {
+    border-color: var(--accent);
+    background: rgba(240,192,64,0.1);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  .station-btn.selected .s-name {
+    color: var(--accent);
+  }
+
+  /* Budget input */
+  .budget-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .budget-symbol {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .budget-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 2px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+
+  .budget-input:focus {
+    border-color: var(--accent);
+  }
+
+  .budget-input::placeholder { color: var(--border); }
+
+  /* Group size */
+  .group-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .group-btn {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .group-btn:hover { border-color: var(--accent); color: var(--text); }
+  .group-btn.selected {
+    border-color: var(--accent);
+    background: rgba(240,192,64,0.1);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Spin button */
+  .spin-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 14px;
+    padding: 20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 3px;
+    color: #0a0a0f;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .spin-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(240,192,64,0.3);
+  }
+
+  .spin-btn:active { transform: translateY(0); }
+  .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* Result panel */
+  .result-panel {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 16px;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .result-panel.show { display: block; }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .platform-display {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .platform-badge {
+    background: var(--accent);
+    color: #0a0a0f;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    width: 90px;
+    height: 90px;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .platform-badge .plabel {
+    font-size: 11px;
+    letter-spacing: 1px;
+    opacity: 0.7;
+    margin-bottom: -4px;
+  }
+
+  .platform-info h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+
+  .platform-info .dest-region {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .platform-info .journey-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(76,175,125,0.15);
+    border: 1px solid rgba(76,175,125,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--green);
+    margin-top: 8px;
+  }
+
+  /* Details grid */
+  .details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .detail-item {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .detail-item .d-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .detail-item .d-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .detail-item .d-value.accent { color: var(--accent); }
+  .detail-item .d-value.green { color: var(--green); }
+
+  /* Activities teaser */
+  .activities-teaser {
+    background: linear-gradient(135deg, rgba(224,90,43,0.1), rgba(240,192,64,0.05));
+    border: 1px dashed rgba(224,90,43,0.4);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .activities-teaser .teaser-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .activities-teaser p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .activities-teaser .lock-icon { font-size: 20px; margin-bottom: 6px; }
+
+  /* Respin */
+  .respin-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 4px;
+  }
+
+  .respin-btn:hover { border-color: var(--text); color: var(--text); }
+
+  /* Departure board animation */
+  .rolling {
+    animation: rollDigits 0.8s ease-out;
+  }
+
+  @keyframes rollDigits {
+    0% { transform: translateY(-10px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Spinner animation on button */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinning::after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #0a0a0f;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 32px;
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 480px) {
+    .station-grid { grid-template-columns: 1fr 1fr; }
+    .platform-display { flex-direction: column; text-align: center; }
+    .details-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="logo-line">
+      <span class="train-icon">🚆</span>
+    </div>
+    <h1>PLATFORM ROULETTE</h1>
+    <p class="tagline">Spin the wheel. Take the train. Live the day.</p>
+  </div>
+
+  <!-- Station Selection -->
+  <div class="card">
+    <div class="card-label">📍 Starting Station</div>
+    <div class="station-grid" id="stationGrid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- Budget -->
+  <div class="card">
+    <div class="card-label">💷 Total Group Budget</div>
+    <div class="budget-row">
+      <div class="budget-symbol">£</div>
+      <input class="budget-input" type="number" id="budget" placeholder="150" min="10" max="9999">
+    </div>
+  </div>
+
+  <!-- Group Size -->
+  <div class="card">
+    <div class="card-label">👥 Group Size</div>
+    <div class="group-row" id="groupRow">
+      <button class="group-btn" data-n="2">2</button>
+      <button class="group-btn" data-n="3">3</button>
+      <button class="group-btn selected" data-n="4">4</button>
+      <button class="group-btn" data-n="5">5</button>
+      <button class="group-btn" data-n="6">6</button>
+      <button class="group-btn" data-n="8">8+</button>
+    </div>
+  </div>
+
+  <button class="spin-btn" id="spinBtn" onclick="spinRoulette()">🎲 SPIN THE PLATFORM</button>
+
+  <!-- Result -->
+  <div class="result-panel" id="resultPanel">
+    <div class="platform-display">
+      <div class="platform-badge">
+        <span class="plabel">PLT</span>
+        <span id="platformNumber">—</span>
+      </div>
+      <div class="platform-info">
+        <h2 id="destName">—</h2>
+        <div class="dest-region" id="destRegion">—</div>
+        <div class="journey-time">🕐 <span id="journeyTime">—</span></div>
+      </div>
+    </div>
+
+    <div class="details-grid">
+      <div class="detail-item">
+        <div class="d-label">Train Fare (return)</div>
+        <div class="d-value accent" id="trainFare">—</div>
+      </div>
+      <div class="detail-item">
+        <div class="d-label">Budget Per Person</div>
+        <div class="d-value green" id="perPerson">—</div>
+      </div>
+      <div class="detail-item">
+        <div class="d-label">Spending Money</div>
+        <div class="d-value" id="spendingMoney">—</div>
+      </div>
+      <div class="detail-item">
+        <div class="d-label">Vibe Check</div>
+        <div class="d-value" id="vibeCheck">—</div>
+      </div>
+    </div>
+
+    <div class="activities-teaser">
+      <div class="lock-icon">🔒</div>
+      <div class="teaser-title">Unlock Activity Checklist</div>
+      <p>Get a tailored list of things to do, eat & explore in <span id="destNameTeaser">your destination</span> — coming in Platform Roulette Pro.</p>
+    </div>
+  </div>
+
+  <button class="respin-btn" id="respinBtn" style="display:none" onclick="spinRoulette()">↺ Respin — different platform</button>
+
+  <div class="footer">Platform Roulette · Made for the spontaneous</div>
+</div>
+
+<script>
+  // Station data with their typical platforms and nearby destinations
+  const stations = [
+    { id: 'kings-cross', name: "King's Cross", city: "London", platforms: 11 },
+    { id: 'euston', name: "Euston", city: "London", platforms: 18 },
+    { id: 'paddington', name: "Paddington", city: "London", platforms: 14 },
+    { id: 'waterloo', name: "Waterloo", city: "London", platforms: 19 },
+    { id: 'victoria', name: "Victoria", city: "London", platforms: 19 },
+    { id: 'manchester-pic', name: "Manchester Piccadilly", city: "Manchester", platforms: 14 },
+    { id: 'birmingham', name: "Birmingham New St", city: "Birmingham", platforms: 12 },
+    { id: 'leeds', name: "Leeds", city: "Leeds", platforms: 17 },
+    { id: 'bristol', name: "Bristol Temple Meads", city: "Bristol", platforms: 13 },
+    { id: 'edinburgh', name: "Edinburgh Waverley", city: "Edinburgh", platforms: 19 },
+  ];
+
+  // Destinations keyed by station — simulated (real app would use National Rail API)
+  const destinationsByStation = {
+    'kings-cross': [
+      { name: "York", region: "North Yorkshire", time: "1h 59m", fare: [28, 45] },
+      { name: "Edinburgh", region: "Scotland", time: "4h 20m", fare: [45, 80] },
+      { name: "Cambridge", region: "Cambridgeshire", time: "52m", fare: [12, 22] },
+      { name: "Newcastle", region: "Tyne & Wear", time: "2h 51m", fare: [32, 55] },
+      { name: "Peterborough", region: "Cambridgeshire", time: "45m", fare: [10, 18] },
+      { name: "Leeds", region: "West Yorkshire", time: "2h 12m", fare: [25, 42] },
+      { name: "Grantham", region: "Lincolnshire", time: "1h 8m", fare: [14, 24] },
+      { name: "Stevenage", region: "Hertfordshire", time: "22m", fare: [8, 14] },
+      { name: "Doncaster", region: "South Yorkshire", time: "1h 37m", fare: [22, 38] },
+      { name: "Darlington", region: "County Durham", time: "2h 20m", fare: [28, 50] },
+      { name: "Berwick-upon-Tweed", region: "Northumberland", time: "3h 45m", fare: [38, 65] },
+    ],
+    'euston': [
+      { name: "Manchester Piccadilly", region: "Greater Manchester", time: "2h 8m", fare: [25, 45] },
+      { name: "Birmingham New St", region: "West Midlands", time: "1h 21m", fare: [15, 30] },
+      { name: "Liverpool Lime St", region: "Merseyside", time: "2h 10m", fare: [22, 40] },
+      { name: "Milton Keynes", region: "Buckinghamshire", time: "35m", fare: [10, 18] },
+      { name: "Rugby", region: "Warwickshire", time: "55m", fare: [12, 22] },
+      { name: "Coventry", region: "West Midlands", time: "1h 2m", fare: [14, 26] },
+      { name: "Crewe", region: "Cheshire", time: "1h 38m", fare: [18, 32] },
+      { name: "Preston", region: "Lancashire", time: "2h 18m", fare: [25, 45] },
+      { name: "Carlisle", region: "Cumbria", time: "3h 20m", fare: [32, 55] },
+      { name: "Glasgow Central", region: "Scotland", time: "4h 30m", fare: [40, 75] },
+    ],
+    'paddington': [
+      { name: "Oxford", region: "Oxfordshire", time: "55m", fare: [12, 22] },
+      { name: "Bath Spa", region: "Somerset", time: "1h 22m", fare: [16, 28] },
+      { name: "Bristol Temple Meads", region: "Bristol", time: "1h 45m", fare: [18, 32] },
+      { name: "Reading", region: "Berkshire", time: "26m", fare: [8, 14] },
+      { name: "Swindon", region: "Wiltshire", time: "52m", fare: [12, 20] },
+      { name: "Cardiff Central", region: "Wales", time: "2h 0m", fare: [20, 36] },
+      { name: "Cheltenham Spa", region: "Gloucestershire", time: "2h 5m", fare: [20, 35] },
+      { name: "Exeter St Davids", region: "Devon", time: "2h 8m", fare: [22, 40] },
+      { name: "Plymouth", region: "Devon", time: "3h 0m", fare: [28, 50] },
+      { name: "Penzance", region: "Cornwall", time: "5h 0m", fare: [40, 70] },
+    ],
+    'waterloo': [
+      { name: "Southampton Central", region: "Hampshire", time: "1h 15m", fare: [14, 26] },
+      { name: "Bournemouth", region: "Dorset", time: "1h 52m", fare: [18, 32] },
+      { name: "Salisbury", region: "Wiltshire", time: "1h 22m", fare: [14, 26] },
+      { name: "Woking", region: "Surrey", time: "26m", fare: [8, 14] },
+      { name: "Guildford", region: "Surrey", time: "35m", fare: [9, 16] },
+      { name: "Winchester", region: "Hampshire", time: "1h 0m", fare: [12, 22] },
+      { name: "Weymouth", region: "Dorset", time: "2h 30m", fare: [22, 38] },
+      { name: "Poole", region: "Dorset", time: "1h 55m", fare: [18, 32] },
+    ],
+    'victoria': [
+      { name: "Brighton", region: "East Sussex", time: "52m", fare: [12, 22] },
+      { name: "Eastbourne", region: "East Sussex", time: "1h 30m", fare: [14, 26] },
+      { name: "Gatwick Airport", region: "Surrey", time: "30m", fare: [10, 18] },
+      { name: "Canterbury East", region: "Kent", time: "1h 30m", fare: [14, 26] },
+      { name: "Dover Priory", region: "Kent", time: "1h 55m", fare: [18, 30] },
+      { name: "Hastings", region: "East Sussex", time: "1h 40m", fare: [16, 28] },
+      { name: "Folkestone Central", region: "Kent", time: "1h 35m", fare: [16, 28] },
+    ],
+    'manchester-pic': [
+      { name: "Liverpool Lime St", region: "Merseyside", time: "35m", fare: [8, 14] },
+      { name: "Leeds", region: "West Yorkshire", time: "55m", fare: [10, 18] },
+      { name: "Sheffield", region: "South Yorkshire", time: "50m", fare: [10, 18] },
+      { name: "Chester", region: "Cheshire", time: "1h 5m", fare: [10, 18] },
+      { name: "York", region: "North Yorkshire", time: "1h 20m", fare: [14, 24] },
+      { name: "Nottingham", region: "Nottinghamshire", time: "1h 45m", fare: [16, 28] },
+      { name: "Huddersfield", region: "West Yorkshire", time: "38m", fare: [7, 13] },
+      { name: "Buxton", region: "Derbyshire", time: "1h 10m", fare: [10, 16] },
+      { name: "Edinburgh", region: "Scotland", time: "3h 15m", fare: [28, 50] },
+      { name: "Windermere", region: "Lake District", time: "1h 35m", fare: [14, 24] },
+    ],
+    'birmingham': [
+      { name: "Coventry", region: "West Midlands", time: "22m", fare: [5, 10] },
+      { name: "Wolverhampton", region: "West Midlands", time: "20m", fare: [5, 10] },
+      { name: "Leicester", region: "Leicestershire", time: "55m", fare: [10, 18] },
+      { name: "Nottingham", region: "Nottinghamshire", time: "1h 15m", fare: [12, 20] },
+      { name: "Shrewsbury", region: "Shropshire", time: "1h 5m", fare: [10, 18] },
+      { name: "Worcester Shrub Hill", region: "Worcestershire", time: "45m", fare: [8, 15] },
+      { name: "Hereford", region: "Herefordshire", time: "1h 25m", fare: [12, 22] },
+      { name: "Derby", region: "Derbyshire", time: "40m", fare: [8, 15] },
+      { name: "Cardiff Central", region: "Wales", time: "2h 5m", fare: [18, 32] },
+    ],
+    'leeds': [
+      { name: "York", region: "North Yorkshire", time: "25m", fare: [6, 12] },
+      { name: "Harrogate", region: "North Yorkshire", time: "35m", fare: [6, 11] },
+      { name: "Bradford", region: "West Yorkshire", time: "20m", fare: [4, 8] },
+      { name: "Sheffield", region: "South Yorkshire", time: "50m", fare: [9, 16] },
+      { name: "Hull", region: "East Yorkshire", time: "1h 5m", fare: [10, 18] },
+      { name: "Scarborough", region: "North Yorkshire", time: "1h 20m", fare: [12, 20] },
+      { name: "Newcastle", region: "Tyne & Wear", time: "1h 25m", fare: [14, 24] },
+      { name: "Skipton", region: "North Yorkshire", time: "45m", fare: [7, 13] },
+      { name: "Carlisle", region: "Cumbria", time: "2h 30m", fare: [18, 32] },
+    ],
+    'bristol': [
+      { name: "Bath Spa", region: "Somerset", time: "11m", fare: [4, 8] },
+      { name: "Cardiff Central", region: "Wales", time: "50m", fare: [8, 15] },
+      { name: "Weston-super-Mare", region: "Somerset", time: "40m", fare: [7, 13] },
+      { name: "Exeter St Davids", region: "Devon", time: "1h 10m", fare: [10, 18] },
+      { name: "Cheltenham Spa", region: "Gloucestershire", time: "45m", fare: [8, 14] },
+      { name: "Swansea", region: "Wales", time: "1h 45m", fare: [14, 26] },
+      { name: "Taunton", region: "Somerset", time: "40m", fare: [7, 13] },
+    ],
+    'edinburgh': [
+      { name: "Glasgow Central", region: "Scotland", time: "50m", fare: [8, 15] },
+      { name: "Perth", region: "Scotland", time: "1h 25m", fare: [12, 20] },
+      { name: "Dundee", region: "Scotland", time: "1h 20m", fare: [12, 20] },
+      { name: "Aberdeen", region: "Scotland", time: "2h 30m", fare: [18, 32] },
+      { name: "Inverness", region: "Scotland", time: "3h 30m", fare: [26, 46] },
+      { name: "Stirling", region: "Scotland", time: "55m", fare: [8, 15] },
+      { name: "Newcastle", region: "England", time: "1h 30m", fare: [14, 26] },
+      { name: "Berwick-upon-Tweed", region: "Northumberland", time: "45m", fare: [8, 14] },
+    ],
+  };
+
+  const vibes = ["🍺 Pub Crawl Energy", "🏛️ Cultural Vibes", "🌊 Coastal Adventure", "🍕 Foodie Mission", "🎉 Party Mode", "🥾 Explore & Walk", "🎭 City Break", "🌄 Scenic Escape"];
+
+  let selectedStation = null;
+  let selectedGroup = 4;
+
+  // Build station grid
+  const grid = document.getElementById('stationGrid');
+  stations.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'station-btn';
+    btn.dataset.id = s.id;
+    btn.innerHTML = `<span class="s-name">${s.name}</span><span class="s-city">${s.city} · ${s.platforms} platforms</span>`;
+    btn.onclick = () => {
+      document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedStation = s;
+    };
+    grid.appendChild(btn);
+  });
+
+  // Group size buttons
+  document.querySelectorAll('.group-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedGroup = parseInt(btn.dataset.n);
+    };
+  });
+
+  function spinRoulette() {
+    if (!selectedStation) {
+      alert('Please select a starting station first!');
+      return;
+    }
+
+    const budget = parseFloat(document.getElementById('budget').value) || 150;
+    const btn = document.getElementById('spinBtn');
+    btn.disabled = true;
+    btn.textContent = 'SPINNING';
+    btn.classList.add('spinning');
+
+    setTimeout(() => {
+      const dests = destinationsByStation[selectedStation.id];
+      const dest = dests[Math.floor(Math.random() * dests.length)];
+      const platform = Math.floor(Math.random() * selectedStation.platforms) + 1;
+
+      // Calculate financials
+      const fareRange = dest.fare;
+      const farePerPerson = fareRange[0] + Math.floor(Math.random() * (fareRange[1] - fareRange[0]));
+      const totalFare = farePerPerson * selectedGroup;
+      const remaining = budget - totalFare;
+      const spendPerPerson = Math.max(0, remaining / selectedGroup);
+
+      document.getElementById('platformNumber').textContent = platform;
+      document.getElementById('destName').textContent = dest.name;
+      document.getElementById('destRegion').textContent = dest.region;
+      document.getElementById('journeyTime').textContent = dest.time + ' journey';
+      document.getElementById('trainFare').textContent = '£' + totalFare + ' total';
+      document.getElementById('perPerson').textContent = '£' + (budget / selectedGroup).toFixed(0) + ' each';
+      document.getElementById('spendingMoney').textContent = spendPerPerson > 0 ? '£' + spendPerPerson.toFixed(0) + ' /person' : '⚠️ Over budget!';
+      document.getElementById('vibeCheck').textContent = vibes[Math.floor(Math.random() * vibes.length)];
+      document.getElementById('destNameTeaser').textContent = dest.name;
+
+      const panel = document.getElementById('resultPanel');
+      panel.classList.remove('show');
+      void panel.offsetWidth;
+      panel.classList.add('show');
+
+      document.getElementById('respinBtn').style.display = 'block';
+
+      btn.disabled = false;
+      btn.textContent = '🎲 SPIN THE PLATFORM';
+      btn.classList.remove('spinning');
+
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 900);
+  }
+</script>
+</body>
+</html>
